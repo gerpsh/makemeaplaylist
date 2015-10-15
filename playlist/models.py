@@ -10,6 +10,7 @@ class Song(models.Model):
     duration = models.IntegerField(null=True)
     energy = models.DecimalField(max_digits=12, decimal_places=11, null=True)
     tempo = models.IntegerField(null=True)
+    path = models.CharField(max_length=500, null=True)
 
     def __unicode__(self):
         return("{} -- {}".format(self.title, self.artist))

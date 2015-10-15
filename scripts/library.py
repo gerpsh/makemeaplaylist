@@ -16,13 +16,12 @@ replacements = {
     "Jackson 5": "The Jacksons",
     "D'Angelo & The Vanguard": "D'Angelo",
     "The Jimi Hendrix Experience": "Jimi Hendrix",
-    
 }
 
-def replace_artist(track):
-    if track.artist in replacements:
-        track.artist = replacements[track.artist]
-    return track
+def replace_artist(artist):
+    if artist in replacements:
+        artist = replacements[artist]
+    return artist
 
 #artist and song title fields, with cleaning methods
 class Track():
@@ -50,6 +49,8 @@ class Track():
                 data['artist'] = xml_track[idx+1].text
             elif val.text == "Name":
                 data['title'] = self.clean_title(xml_track[idx+1].text)
+            elif val.text == "Location":
+                data['path'] = xml_track[idx+1].text
         return data
 
     def __init__(self, xml_track=None):
@@ -57,9 +58,11 @@ class Track():
             track_data = self.extract_data(xml_track)
             self.artist = track_data['artist']
             self.title = self.clean_title(track_data['title'])
+            self.path = track_data['path']
         else:
             self.artist = None
             self.title = None
+            self.path = None
 
 #collection of Track objects
 class MusicLibrary():
@@ -88,8 +91,6 @@ class MusicLibrary():
         else:
             self.track_list = []
 
-
-
 class EchoNestSongDatum():
     def __init__(self, title, artist):
         self.title = title
@@ -99,7 +100,7 @@ class EchoNestSongDatum():
 
     def get_data(self):
         try:
-            s = song.search(title=self.title, artist=replace(self.artist))[0]
+            s = song.search(title=self.title, artist=replace_artist(self.artist))[0]
             self.song_hotness = s.song_hotttnesss
             self.artist_hotness = s.artist_hotttnesss
             self.artist_familiarity = s.artist_familiarity

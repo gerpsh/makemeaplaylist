@@ -1,8 +1,10 @@
 from library import MusicLibrary, EchoNestSongDatum
 from playlist.models import *
 from time import sleep
+from urllib import unquote
+import sys
 
-music_library = MusicLibrary("scripts/iTunesLibrary.xml")
+music_library = MusicLibrary("/Users/Jerry/Music/iTunes/iTunes Library.xml")
 
 replacements = {"Snoop Doggy Dogg": "Snoop Dogg", "Chance The Rapper": "Chance", "Jackson 5": "The Jacksons"}
 
@@ -14,7 +16,6 @@ def run():
 
     def textify(song):
         return("Song not found: {} - {}".format(song.title.encode('utf-8'), song.artist.encode('utf-8')))
-
 
     for track in music_library.track_list:
         if not Song.objects.filter(title=track.title, artist=track.artist) and textify(track) not in already_tried:
@@ -31,12 +32,13 @@ def run():
                         danceability=ensd.danceability,
                         duration=ensd.duration,
                         energy=ensd.energy,
-                        tempo=ensd.tempo
+                        tempo=ensd.tempo,
+                        path=track.path
                     )
-
                     s.save()
                 sleep(5)
             except:
-                print("Socket broke, restarting")
+                print "Unexpected error:", sys.exc_info()[0]
+                print("Restarting")
                 sleep(60)
                 continue

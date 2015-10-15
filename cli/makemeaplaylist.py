@@ -3,6 +3,7 @@ import urllib2
 import random
 from pandas import DataFrame
 from sklearn import linear_model
+from sklearn import tree
 
 songs_data = json.loads(urllib2.urlopen('http://104.236.246.87/playlist/get-all-songs/').read())['data']
 
@@ -27,15 +28,33 @@ while resp != 'x':
 frame = DataFrame(songs)
 predictors = frame[['songHotness', 'artistHotness', 'artistFamiliarity', 'danceability', 'energy', 'tempo']]
 outcome = frame['include']
-model = linear_model.LogisticRegression()
-model.fit(predictors, outcome)
+
+log_model = linear_model.LogisticRegression()
+log_model = log_model.fit(predictors, outcome)
+
+tree_model = tree.DecisionTreeClassifier()
+tree_model = tree_model.fit(predictors, outcome)
+
 
 for song in songs_data:
-    song_data = [song['songHotness'], song['artistHotness'], song['artistFamiliarity'], song['danceability'], song['energy'], song['tempo']]
-    positive_prob = model.predict_proba(song_data)[0][1]
-    song['log_prob'] = positive_prob
+    song_data = [song['songHotness'],
+        song['artistHotness'],
+        song['artistFamiliarity'],
+        song['danceability'],
+        song['energy'],
+        song['tempo']
+    ]
+    log_positive_prob = log_model.predict_proba(song_data)[0][1]
+    song['log_prob'] = log_positive_prob
+    tree_positive_prob = log_model.predict_proba(song_data)[0][1]
+    song['tree_prob'] = tree_positive_prob
+    song['avg_prob'] = (log_positive_prob+tree_positive_prob)/2
 
-songs_data = reversed(sorted(songs_data, key=lambda x: x['log_prob']))
+
+songs_data = reversed(sorted(songs_data, key=lambda x: x['avg_prob']))
 for i, song in enumerate(songs_data):
     if i < num_songs:
-        print('{}. {} - {}'.format((i+1), song['title'].encode('utf-8'), song['artist'].encode('utf-8')))
+        print('{}. {} - {} | prob: {}'.format((i+1), song['title'].encode('utf-8'),
+            song['artist'].encode('utf-8'),
+            song['avg_prob'])
+        )
