@@ -174,7 +174,9 @@ def build_workout(request):
             lower = block['lower']
             tempo = block['cadence']
             #filter songs for energy and tempo
-            cands = Song.objects.filter(energy__range=(lower, upper))
+            #also filter songs for length > 1 min as well, we don't want songs
+            #to be too short/rap album skits
+            cands = Song.objects.filter(energy__range=(lower, upper)).filter(duration__gte=60)
             cands = [song for song in cands if is_tempo_match(tempo, song)]
             #see block.py
             song_block = build_block(cands, duration)

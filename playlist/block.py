@@ -19,27 +19,26 @@ def build_block(the_songs, the_duration):
     #   target: target number of seconds for the block
     #   index: starting index for the candidate list
     #   sum: current sum of seconds for the collected blocked
-    #   currentList: list of songs currently being testing for solution-ness
+    #   current_list: list of songs currently being testing for solution-ness
     #   solution: final list of solutions
-    def combinationSumProcess(candidates, target, index, sum, currentList, solution):
-        #if this solution works, add to list of valid solutions
+    def combination_sum_process(candidates, target, index, sum, current_list, solution):
+        #if this current solution works, add to list of valid solutions
         if sum == target:
-            solution.append(list(currentList))
-
+            solution.append(list(current_list))
         for i in range(index,len(candidates)):
             if (sum + candidates[i].duration > target):
                 break;
-            currentList.append(candidates[i])
-            combinationSumProcess(candidates, target, i, sum+candidates[i].duration, currentList, solution)
-            currentList.pop()
+            current_list.append(candidates[i])
+            combination_sum_process(candidates, target, i, sum+candidates[i].duration, current_list, solution)
+            current_list.pop()
 
     #find all solutions
     #args:
     #   candidates: list of potential candidates, in this case songs
     #   target: target number of seconds for the block
-    def combinationSum(candidates, target):
+    def combination_sum(candidates, target):
         solution=[]
-        combinationSumProcess(candidates, target, 0, 0, [], solution)
+        combination_sum_process(candidates, target, 0, 0, [], solution)
         return solution
 
     #for single list, check if all songs are unique
@@ -59,15 +58,15 @@ def build_block(the_songs, the_duration):
                 return False
         return True
 
-    #fund combinations, increment desired time by 1 if initial solution set is empty
-    def findCombinations(candidates, target):
-        result = combinationSum(candidates, target)
+    #find combinations, increment desired time by 1 if initial solution set is empty
+    def find_combinations(candidates, target):
+        result = combination_sum(candidates, target)
         if not result or no_uniques(result):
-            findCombinations(candidates, target + 1)
+            find_combinations(candidates, target + 1)
         else:
             return result
 
-    combs = findCombinations(the_songs, the_duration)
+    combs = find_combinations(the_songs, the_duration)
     #filter out non-unique solutions
     if combs:
         x = filter(all_unique, combs)
